@@ -1,0 +1,235 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  authID              String             @id @unique
+  idType              String
+  firstName           String
+  lastName            String
+  avatar              String?
+  phone               String
+  email               String             @unique
+  age                 Int
+  gender              Gender
+  maritalStatus       MaritalStatus
+  salary              Int                @default(0)
+  contractType        String?
+  industry            String?
+  avgRating           Float              @default(0)
+  previousContracts   Int                @default(0)
+  contractsPer        Int                @default(0)
+  avgContractDuration Int                @default(0)
+  rating              Rating             @default(NA)
+  isFamily            Boolean            @default(false)
+  tenure              Int                @default(0)
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  id                  Int                @unique
+  Application         Application[]
+  Appointment         Appointment[]
+  Contract            Contract[]
+  TenantPreference    TenantPreference[]
+}
+
+model Landlord {
+  /// ID de autenticación (único)
+  authID             String               @id @unique
+  /// Nombre del arrendador
+  firstName          String
+  /// Apellido del arrendador
+  lastName           String
+  /// Género del arrendador (Masculino o Femenino)
+  gender             Gender
+  /// Número de teléfono
+  phone              String
+  /// Correo electrónico (único)
+  email              String               @unique
+  /// URL del avatar (opcional)
+  avatar             String?
+  /// Calificación promedio, con valor por defecto 0
+  avgRating          Float                @default(0)
+  /// Fecha de creación (simula timestamps: true)
+  createdAt          DateTime             @default(now())
+  /// Fecha de última actualización
+  updatedAt          DateTime             @updatedAt
+  id                 Int                  @unique
+  Appointment        Appointment[]
+  LandlordPreference LandlordPreference[]
+  Property           Property[]
+}
+
+model Property {
+  id             Int             @id @default(autoincrement())
+  /// Clave foránea: referencia al authID del Landlord
+  landlordAuthID String
+  address        String          @db.VarChar(200)
+  city           String          @db.VarChar(50)
+  state          String          @db.VarChar(50)
+  type           String          @db.VarChar(50)
+  rooms          Int
+  parking        Int
+  squareMeters   Int
+  tier           Int
+  bathrooms      Int
+  age            Int
+  floors         Int
+  description    String?         @db.VarChar(1000)
+  isAvailable    Boolean         @default(false)
+  rentPrice      Float?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  Application    Application[]
+  Appointment    Appointment[]
+  Contract       Contract[]
+  landlord       Landlord        @relation(fields: [landlordAuthID], references: [authID])
+  PropertyMedia  PropertyMedia[]
+}
+
+model PropertyMedia {
+  id          Int      @id @default(autoincrement())
+  propertyFk  Int      @map("property")
+  mediaType   String
+  mediaUrl    String
+  description String?
+  uploadDate  DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  property    Property @relation(fields: [propertyFk], references: [id])
+}
+
+model Application {
+  id                   Int                    @id @default(autoincrement())
+  /// Clave foránea: referencia a la propiedad
+  propertyId           Int
+  /// ID de autenticación del inquilino
+  tenantAuthID         String
+  personalDescription  String
+  status               Int                    @default(0)
+  score                Float                  @default(0)
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  property             Property               @relation(fields: [propertyId], references: [id])
+  tenant               Tenant                 @relation(fields: [tenantAuthID], references: [authID])
+  ApplicationMedia     ApplicationMedia[]
+  ApplicationReference ApplicationReference[]
+}
+
+model ApplicationMedia {
+  id            Int                      @id @default(autoincrement())
+  applicationId Int
+  mediaType     String
+  mediaUrl      String
+  /// Tipo de documento soportado. Opcional.
+  type          ApplicationMediaDocType?
+  createdAt     DateTime                 @default(now())
+  updatedAt     DateTime                 @updatedAt
+  application   Application              @relation(fields: [applicationId], references: [id])
+}
+
+model ApplicationReference {
+  id            Int         @id @default(autoincrement())
+  applicationId Int
+  name          String
+  lastname      String
+  cellphone     String
+  relationship  String
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  application   Application @relation(fields: [applicationId], references: [id])
+}
+
+model LandlordPreference {
+  id              Int      @id @default(autoincrement())
+  landlordAuthID  String
+  preferenceType  String
+  preferenceValue String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  landlord        Landlord @relation(fields: [landlordAuthID], references: [authID])
+}
+
+model TenantPreference {
+  id              Int      @id @default(autoincrement())
+  tenantAuthID    String
+  preferenceType  String
+  preferenceValue String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  tenant          Tenant   @relation(fields: [tenantAuthID], references: [authID])
+}
+
+model Contract {
+  id               Int                @id @default(autoincrement())
+  propertyId       Int
+  tenantAuthID     String
+  startDate        DateTime
+  endDate          DateTime
+  monthlyRent      Float
+  status           String
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  property         Property           @relation(fields: [propertyId], references: [id])
+  tenant           Tenant             @relation(fields: [tenantAuthID], references: [authID])
+  ContractDocument ContractDocument[]
+}
+
+model ContractDocument {
+  id           Int      @id @default(autoincrement())
+  contractId   Int
+  documentType String
+  documentUrl  String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  contract     Contract @relation(fields: [contractId], references: [id])
+}
+
+model Appointment {
+  id          Int      @id @default(autoincrement())
+  landlordId  String
+  tenantId    String
+  propertyId  Int
+  title       String
+  date        DateTime
+  time        String
+  description String
+  landlord    Landlord @relation(fields: [landlordId], references: [authID])
+  property    Property @relation(fields: [propertyId], references: [id])
+  tenant      Tenant   @relation(fields: [tenantId], references: [authID])
+}
+
+enum Gender {
+  Masculino
+  Femenino
+}
+
+enum MaritalStatus {
+  Soltero
+  Casado
+  Viudo
+  Divorciado
+  UnionLibre @map("Unión Libre")
+}
+
+enum Rating {
+  A_PLUS @map("A+")
+  A
+  B
+  C
+  D
+  E
+  F
+  NA     @map("N/A")
+}
+
+enum ApplicationMediaDocType {
+  DocumentoDeIdentidad @map("Documento de identidad")
+  CertificadoLaboral   @map("Certificado laboral")
+  SoportePagoNomina    @map("Soporte pago nómina")
+  ExtractosBancarios   @map("Extractos bancarios")
+}
