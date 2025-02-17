@@ -12,7 +12,7 @@ import AuthRouter from "./auth/auth";
 import LandlordRouter from "./users/landlord";
 import TenantPreferenceRouter from "./preferences/tenant";
 import AppointmentRouter from "./appointments/appointments";
-
+import MercadoPagoRouter from "./mercado_pago/mercado_pago";
 
 
 const router = express.Router();
@@ -32,4 +32,5 @@ router.use("/tenant-preferences", TenantPreferenceRouter);
 router.use("/landlord-preferences", TenantPreferenceRouter);
 router.use("/contracts", ContractRouter);
 router.use("/appointment", AppointmentRouter);
+router.use("/mercado-pago", MercadoPagoRouter);
 export default router;

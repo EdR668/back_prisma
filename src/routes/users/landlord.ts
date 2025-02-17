@@ -6,6 +6,7 @@ import {
   showLandlord,
   showLandlords,
   getActiveTenantsByLandlord,
+  validateMercadoPagoAccessToken,
 } from "../../controllers/users/landlord";
 import { showPropertiesAndCandidatesByLandlordId } from "../../controllers/properties/property";
 
@@ -197,6 +198,29 @@ LandlordRouter.get("/:id/tenants/active", getActiveTenantsByLandlord);
  *         description: No se encontraron propiedades o candidatos para el arrendador
  */
 LandlordRouter.get("/:landlordId/candidates", showPropertiesAndCandidatesByLandlordId);
+
+/**
+ * @swagger
+ * /api/landlord/mercado-pago/validate-access-token/{authID}:
+ *   get:
+ *     tags:
+ *       - Landlords
+ *     summary: Verificar si el landlord tiene un token de acceso de Mercado Pago
+ *     parameters:
+ *       - in: path
+ *         name: authID
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID del arrendador
+ *     responses:
+ *       '200':
+ *         description: Validación exitosa
+ *       '404':
+ *         description: No se encuentra el token de acceso
+ */
+LandlordRouter.get("/mercado-pago/validate-access-token/:authID", validateMercadoPagoAccessToken);
+
 
 export default LandlordRouter;
 

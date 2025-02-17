@@ -182,3 +182,39 @@ export const getActiveTenantsByLandlord: RequestHandler = async (req, res, next)
     next(error);
   }
 };
+
+export const validateMercadoPagoAccessToken: RequestHandler = async (req, res, next) => {
+  try {
+    const { authID } = req.params;
+
+    const landlord = await prisma.landlord.findUnique({
+      where: { authID },
+      select: {
+        mercadopagoaccesstoken: true, 
+        email: true,
+        id: true,
+        createdAt: true,
+        updatedAt: true,
+        authID: true,
+        firstName: true,
+        lastName: true,
+        avatar: true,
+        gender: true,
+        avgRating: true
+      }
+    });
+
+    if (!landlord) {
+      return next(createHttpError(404, `Landlord with ID ${authID} not found`));
+    }
+
+    if (!landlord.mercadopagoaccesstoken) {
+      return next(createHttpError(404, "Mercado Pago Access Token not set"));
+    }
+
+    res.status(200).json({message: "Mercado Pago Access Token is set"});
+  }
+  catch (error) {
+    next(error);
+  }
+};

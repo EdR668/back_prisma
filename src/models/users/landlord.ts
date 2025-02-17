@@ -64,6 +64,9 @@ const Landlord = new Schema({
     min: [0, "La calificación mínima del arrendatario es 0"],
     max: [10, "La calificación máxima del arrendatario es 10"],
   },
+  mercadopagoaccesstoken: {
+    type: String,
+  },
 },
   { timestamps: true }
 );

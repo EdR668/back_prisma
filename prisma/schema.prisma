@@ -39,29 +39,30 @@ model Tenant {
 
 model Landlord {
   /// ID de autenticación (único)
-  authID             String               @id @unique
+  authID                 String               @id @unique
   /// Nombre del arrendador
-  firstName          String
+  firstName              String
   /// Apellido del arrendador
-  lastName           String
+  lastName               String
   /// Género del arrendador (Masculino o Femenino)
-  gender             Gender
+  gender                 Gender
   /// Número de teléfono
-  phone              String
+  phone                  String
   /// Correo electrónico (único)
-  email              String               @unique
+  email                  String               @unique
   /// URL del avatar (opcional)
-  avatar             String?
+  avatar                 String?
   /// Calificación promedio, con valor por defecto 0
-  avgRating          Float                @default(0)
+  avgRating              Float                @default(0)
   /// Fecha de creación (simula timestamps: true)
-  createdAt          DateTime             @default(now())
+  createdAt              DateTime             @default(now())
   /// Fecha de última actualización
-  updatedAt          DateTime             @updatedAt
-  id                 Int                  @unique
-  Appointment        Appointment[]
-  LandlordPreference LandlordPreference[]
-  Property           Property[]
+  updatedAt              DateTime             @updatedAt
+  id                     Int                  @unique
+  mercadopagoaccesstoken String?
+  Appointment            Appointment[]
+  LandlordPreference     LandlordPreference[]
+  Property               Property[]
 }
 
 model Property {

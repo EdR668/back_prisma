@@ -11,11 +11,12 @@ const prisma = new PrismaClient();
 export const createAppointment: RequestHandler = async (req, res, next) => {
     try {
       // Extraer datos usando los nombres correctos
-      const { landlordId, tenantId, propertyId, title, date, time, description } = req.body;
+      const { landLordAuthID, tenantAuthID, propertyID, title, date, time, description } = req.body;
+      console.log("req.body", req.body);
   
       // Verificar que el arrendador existe
       const landlord = await prisma.landlord.findUnique({
-        where: { authID: landlordId },
+        where: { authID: landLordAuthID },
       });
       if (!landlord) {
         throw createHttpError(404, "El arrendador no existe");
@@ -23,7 +24,7 @@ export const createAppointment: RequestHandler = async (req, res, next) => {
   
       // Verificar que el inquilino existe
       const tenant = await prisma.tenant.findUnique({
-        where: { authID: tenantId },
+        where: { authID: tenantAuthID },
       });
       if (!tenant) {
         throw createHttpError(404, "El inquilino no existe");
@@ -31,7 +32,7 @@ export const createAppointment: RequestHandler = async (req, res, next) => {
   
       // Verificar que la propiedad existe
       const property = await prisma.property.findUnique({
-        where: { id: Number(propertyId) },
+        where: { id: Number(propertyID) },
       });
       if (!property) {
         throw createHttpError(404, "La propiedad no existe");
@@ -40,9 +41,9 @@ export const createAppointment: RequestHandler = async (req, res, next) => {
       // Crear la cita utilizando los nombres correctos
       const newAppointment = await prisma.appointment.create({
         data: {
-          landlordId,
-          tenantId,
-          propertyId: Number(propertyId),
+          landlordId: landLordAuthID,
+          tenantId: tenantAuthID,
+          propertyId: Number(propertyID),
           title,
           date: new Date(date),
           time,
@@ -166,7 +167,7 @@ export const getActiveContractsByTenant: RequestHandler = async (req, res, next)
     const tenantDetails = await prisma.tenant.findUnique({
       where: { authID: id },
     });
-    const contractsWithTenant = contracts.map(contract => ({
+    const contractsWithTenant = contracts.map((contract: any) => ({
       ...contract,
       tenant: tenantDetails,
     }));
