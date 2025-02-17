@@ -71,7 +71,7 @@ export const MercadoPagoCallback: RequestHandler  = async (req, res, next) => {
                 client_secret: process.env.MP_CLIENT_SECRET,
                 client_id: process.env.MP_CLIENT_ID,
                 code: code as string,
-                redirect_uri: `${process.env.BACKEND_URL}/api/mercadopago/callback`,
+                redirect_uri: `https://back-prisma-git-mercadopago-edr668s-projects.vercel.app/api/mercadopago/callback`,
             }
         });
 
