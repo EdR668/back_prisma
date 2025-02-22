@@ -54,6 +54,7 @@ const AuthRouter = express.Router();
  */
 AuthRouter.post("/assignRole", assignRole);
 
+
 /**
  * @swagger
  * /api/auth/verifyProfile:
