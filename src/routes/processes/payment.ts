@@ -5,6 +5,7 @@ import {
   showPayment,
   showPayments,
   updatePayment,
+  alreadyThisMonthPayment
 } from "../../controllers/processes/payment";
 
 const PaymentRouter = express.Router();
@@ -119,6 +120,7 @@ PaymentRouter.get("/", showPayments);
 PaymentRouter.patch("/:id", updatePayment);
 PaymentRouter.delete("/:id", deletePayment);
 PaymentRouter.get("/:id", showPayment);
+PaymentRouter.post("/alreadyThisMonthPayment", alreadyThisMonthPayment);
 
 export default PaymentRouter;
 

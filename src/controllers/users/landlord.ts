@@ -155,6 +155,7 @@ export const getActiveTenantsByLandlord: RequestHandler = async (req, res, next)
         },
       },
     });
+    
 
     if (!landlord) {
       return next(createHttpError(404, `Landlord with ID ${id} not found`));
@@ -208,7 +209,7 @@ export const validateMercadoPagoAccessToken: RequestHandler = async (req, res, n
       return next(createHttpError(404, `Landlord with ID ${authID} not found`));
     }
 
-    if (!landlord.mercadopagoaccesstoken) {
+    if (landlord.mercadopagoaccesstoken === null) {
       return next(createHttpError(404, "Mercado Pago Access Token not set"));
     }
 

@@ -10,37 +10,62 @@ const prisma = new PrismaClient();
  */
 export const createContract: RequestHandler = async (req, res, next) => {
   try {
-    const { contractData, contractDocs } = req.body;
+    const { 
+      property_id,
+      tenant_id,
+      startDate,
+      endDate,
+      monthlyAmount,
+      durationMonths,
+      totalValue,
+    } = req.body;
+
+    const contractDoc  = req.files;
+
+    const propertyHasContract = await prisma.contract.findFirst({
+      where: { propertyId: Number(property_id) },
+    });
+
+    if (propertyHasContract) {
+      throw createHttpError(400, "The property already has a contract associated");
+    }
 
     // Crear el contrato
     const newContract = await prisma.contract.create({
       data: {
-        ...contractData,
-        // Si contractData.property es un string que representa el id de la propiedad,
-        // conectamos la relación. Ejemplo: property: { connect: { id: Number(contractData.property) } }
-        property: { connect: { id: Number(contractData.property) } },
-        // Se supone que tenantAuthID se guarda en el contrato para referenciar al tenant.
+        propertyId: (Number(property_id)),
+        tenantAuthID: tenant_id,
+        startDate: new Date(startDate),
+        endDate: new Date(endDate),
+        monthlyRent: Number(monthlyAmount),
+        status: "1",
       },
     });
 
-    // Manejar múltiples documentos
-    const docPromises = contractDocs.map(async (doc: { file: any; documentType?: string }) => {
-      const docUrl = await uploadFileS3(doc.file);
-      return await prisma.contractDocument.create({
+    // retirar casa de la lista de disponibles
+    await prisma.property.update({
+      where: { id: Number(property_id) },
+      data: { isAvailable: false },
+    });
+
+    // Crear documento
+    if (contractDoc) {
+      const docUrl = await uploadFileS3(contractDoc.contractFile);
+
+      const newDoc = await prisma.contractDocument.create({
         data: {
           contractId: newContract.id,
-          documentType: doc.documentType || "",
+          documentType: Array.isArray(contractDoc.contractFile) ? contractDoc.contractFile[0].mimetype : contractDoc.contractFile.mimetype,
           documentUrl: docUrl,
         },
       });
-    });
-    const newDocs = await Promise.all(docPromises);
 
-    res.status(201).json({
-      contract: newContract,
-      docs: newDocs,
-    });
-    return;
+      res.status(201).json({
+        contract: newContract,
+        docs: newDoc,
+      });
+      return;
+    }
   } catch (error) {
     console.error("Error creating contract:", error);
     next(error);
@@ -67,21 +92,50 @@ export const getContractById: RequestHandler = async (req, res, next) => {
   try {
     const { id } = req.params;
     const contractId = Number(id);
+
     const contract = await prisma.contract.findUnique({
       where: { id: contractId },
       include: {
-        property: { select: { address: true, city: true, state: true } },
+        property: {
+          select: {
+            address: true,
+            city: true,
+            state: true,
+            type: true,
+            rooms: true,
+            parking: true,
+            squareMeters: true,
+            tier: true,
+            bathrooms: true,
+            age: true,
+            floors: true,
+            description: true,
+            isAvailable: true,
+            rentPrice: true,
+            PropertyMedia: {
+              select: {
+                id: true,
+                mediaType: true,
+                mediaUrl: true,
+                description: true,
+                uploadDate: true,
+              },
+            },
+          },
+        },
       },
     });
+
     if (!contract) {
       throw createHttpError(404, `Contract with ID ${id} not found`);
     }
+
     res.status(200).json(contract);
-    return;
   } catch (error) {
     next(error);
   }
 };
+
 
 /**
  * Obtiene los contratos asociados a un tenant (usando tenantAuthID) e incluye la propiedad.

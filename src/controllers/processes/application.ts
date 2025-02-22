@@ -28,14 +28,15 @@ export const createApplication: RequestHandler = async (req, res, next) => {
     });
 
     // Manejar medios: se espera que applicationMedias sea un array
-    const mediaPromises = applicationMedias.map(async (media: { file: any }) => {
+    const mediaPromises = applicationMedias.map(async (media: { mediaType: string, file: any }) => {
       // Prepend el id de la aplicación al nombre del archivo
       media.file.name = `${newApplication.id}-${media.file.name}`;
       const mediaUrl = await uploadFileS3(media.file);
+      console.log(media.mediaType);
       return await prisma.applicationMedia.create({
         data: {
           applicationId: newApplication.id,
-          mediaType: media.file.mimetype,
+          mediaType: media.mediaType,
           mediaUrl,
         },
       });

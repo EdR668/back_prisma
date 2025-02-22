@@ -13,7 +13,7 @@ const prisma = new PrismaClient();
 /** 
  * Crea una propiedad y, si se envían archivos, crea los registros de PropertyMedia asociados.
  */
-export const createProperty: RequestHandler = async (req, res, next) => {
+export const createProperty: RequestHandler = async (req, res, next) => { 
   try {
     const {
       address,
@@ -39,35 +39,38 @@ export const createProperty: RequestHandler = async (req, res, next) => {
         city,
         state,
         type,
-        rooms,
-        parking,
-        squareMeters,
-        tier,
-        bathrooms,
-        age,
-        floors,
+        rooms: Number(rooms),
+        parking: Number(parking),
+        squareMeters: Number(squareMeters),
+        tier: Number(tier),
+        bathrooms: Number(bathrooms),
+        age: Number(age),
+        floors: Number(floors),
         description,
         landlordAuthID,
       },
     });
+    
 
     // Manejar archivos multimedia (PropertyMedia)
     if (files && Array.isArray(files)) {
-      const mediaPromises = files.map(async (file: any) => {
-        // Subir el archivo a S3
-        const s3Result = await uploadFileS3(file);
-        // Crear registro de PropertyMedia con referencia a la propiedad
-        return await prisma.propertyMedia.create({
-          data: {
-            propertyFk: newProperty.id, // Se asume que Property.id coincide con la relación
-            mediaType: file.mimetype,
-            mediaUrl: s3Result,
-            description: file.description || "",
-            uploadDate: new Date(),
-          },
-        });
-      });
-      await Promise.all(mediaPromises);
+      for (const file of files) {
+        try {
+          const s3Result = await uploadFileS3(file);
+          const media = await prisma.propertyMedia.create({
+            data: {
+              property: { connect: { id: newProperty.id } },
+              mediaType: file.mimetype,
+              mediaUrl: s3Result,
+              description: file.name,
+              uploadDate: new Date(),
+            },
+          });
+          console.log("Media creada:", media);
+        } catch (error) {
+          console.error("Error insertando media:", error);
+        }
+      }
     } else {
       throw new Error("Failed to upload file, there's no file to upload");
     }
@@ -89,35 +92,93 @@ export const updateProperty: RequestHandler = async (req, res, next) => {
   try {
     const { id } = req.params;
     const propertyId = Number(id);
-    const updatedData = req.body;
+    const {
+      address,
+      city,
+      state,
+      type,
+      rooms,
+      parking,
+      squareMeters,
+      tier,
+      bathrooms,
+      age,
+      floors,
+      description,
+      landlordAuthID,
+    } = req.body;
+
+    // Convertir rentPrice a número si existe
+    
 
     const updatedProperty = await prisma.property.update({
       where: { id: propertyId },
-      data: updatedData,
+      data: {
+        address,
+        city,
+        state,
+        type,
+        rooms: Number(rooms),
+        parking: Number(parking),
+        squareMeters: Number(squareMeters),
+        tier: Number(tier),
+        bathrooms: Number(bathrooms),
+        age: Number(age),
+        floors: Number(floors),
+        description,
+        landlordAuthID,
+      },
     });
 
     res.status(200).json(updatedProperty);
-    return;
   } catch (error: any) {
     next(error);
   }
 };
+
+export const setPropertyOnSearch: RequestHandler = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const propertyId = Number(id);
+    const { isAvailable, rentPrice } = req.body;
+
+    const updatedProperty = await prisma.property.update({
+      where: { id: propertyId },
+      data: {
+        isAvailable,
+        rentPrice: Number(rentPrice),
+      },
+    });
+
+    res.status(200).json(updatedProperty);
+  } catch (error: any) {
+    next(error);
+  }
+}
+
 
 /** Elimina una propiedad por su id */
 export const deleteProperty: RequestHandler = async (req, res, next) => {
   try {
     const { id } = req.params;
     const propertyId = Number(id);
+
+    // Eliminar primero los registros en PropertyMedia
+    await prisma.propertyMedia.deleteMany({
+      where: { property: { id: propertyId } },
+    });
+
+    // Luego eliminar la propiedad
     await prisma.property.delete({
-      where: { id: propertyId  },
+      where: { id: propertyId },
     });
 
     res.status(200).json("Property successfully deleted");
-    return;
   } catch (error: any) {
     next(error);
   }
 };
+
 
 /** Muestra una propiedad, sus medios asociados y el contrato activo (si existe) */
 export const showProperty: RequestHandler = async (req, res, next) => {
@@ -184,7 +245,7 @@ export const showPropertiesByUser: RequestHandler = async (req, res, next) => {
       include: {
         PropertyMedia: true,
         Contract: {
-          where: { status: "active" },
+          where: { status: "1" },
         },
       },
     });

@@ -8,7 +8,8 @@ import {
   updateProperty,
   showAvailableProperties,
   showAvailablePropertiesWithoutFilters,
-  showPropertiesAndCandidatesByLandlordId
+  showPropertiesAndCandidatesByLandlordId,
+  setPropertyOnSearch
 } from "../../controllers/properties/property";
 
 const PropertyRouter = express.Router();
@@ -337,6 +338,7 @@ PropertyRouter.patch("/:id", updateProperty);
 PropertyRouter.delete("/:id", deleteProperty);
 PropertyRouter.get("/:id", showProperty);
 PropertyRouter.get("/landlord/:landlordId", showPropertiesAndCandidatesByLandlordId);
+PropertyRouter.patch("/onSearch/:id", setPropertyOnSearch);
 
 export default PropertyRouter;
 /**

@@ -18,12 +18,18 @@ const client = new S3Client({
 });
 
 export async function uploadFileS3(file: any): Promise<string> {
+  
   if (!file.data || !file.name) {
     throw new Error("File data or file name is missing");
   }
 
   // Si file.data viene en formato data URI, quita la parte del prefijo
   let base64Data = file.data;
+
+  if (typeof base64Data !== "string") {
+    base64Data = base64Data.toString("base64");
+  }
+  
   if (base64Data.startsWith("data:")) {
     base64Data = base64Data.split(",")[1];
   }
