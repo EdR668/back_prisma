@@ -13,6 +13,7 @@ import LandlordRouter from "./users/landlord";
 import TenantPreferenceRouter from "./preferences/tenant";
 import AppointmentRouter from "./appointments/appointments";
 import MercadoPagoRouter from "./mercado_pago/mercado_pago";
+import { validateCard } from "../utils/stripe";
 
 
 const router = express.Router();
@@ -33,4 +34,5 @@ router.use("/landlord-preferences", TenantPreferenceRouter);
 router.use("/contracts", ContractRouter);
 router.use("/appointment", AppointmentRouter);
 router.use("/mercado-pago", MercadoPagoRouter);
+router.post("/validate-card", validateCard)
 export default router;
