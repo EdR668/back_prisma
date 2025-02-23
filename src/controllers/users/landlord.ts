@@ -155,6 +155,7 @@ export const getActiveTenantsByLandlord: RequestHandler = async (req, res, next)
         },
       },
     });
+    console.log(landlord);
     
 
     if (!landlord) {

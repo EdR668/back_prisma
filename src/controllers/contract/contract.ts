@@ -123,6 +123,15 @@ export const getContractById: RequestHandler = async (req, res, next) => {
             },
           },
         },
+        ContractDocument: { 
+          select: {
+            id: true,
+            documentType: true,
+            documentUrl: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
       },
     });
 
@@ -135,6 +144,7 @@ export const getContractById: RequestHandler = async (req, res, next) => {
     next(error);
   }
 };
+
 
 
 /**

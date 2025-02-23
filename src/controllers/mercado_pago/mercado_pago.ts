@@ -65,7 +65,7 @@ export const CreatePreference: RequestHandler = async (req, res, next) => {
                 auto_return: "approved",
                 back_urls: {
                     success: `http://localhost:3000/inquilino-dashboard/payment/success?contractId=${contract.id}`,
-                    failure: `http://localhost:3000/inquilino-dashboard/payment/failure?contractId=${contract.id}`,
+                    failure: `http://localhost:3000/inquilino-dashboard/payment/failed?contractId=${contract.id}`,
                     pending: `http://localhost:3000/inquilino-dashboard/payment/pending?contractId=${contract.id}`,
                 },
             } 
