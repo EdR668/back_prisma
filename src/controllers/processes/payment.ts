@@ -11,7 +11,7 @@ export const createPayment: RequestHandler = async (req, res, next) => {
     const { payment_id, contract_id, tenantAuthID} = req.body;
 
     const contract = await prisma.contract.findUnique({
-      where: { id: contract_id },
+      where: { id: Number(contract_id) },
     });
 
     if (!contract) {
