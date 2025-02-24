@@ -64,9 +64,9 @@ export const CreatePreference: RequestHandler = async (req, res, next) => {
                 external_reference: String(contract.id),
                 auto_return: "approved",
                 back_urls: {
-                    success: `http://localhost:3000/inquilino-dashboard/payment/success?contractId=${contract.id}`,
-                    failure: `http://localhost:3000/inquilino-dashboard/payment/failed?contractId=${contract.id}`,
-                    pending: `http://localhost:3000/inquilino-dashboard/payment/pending?contractId=${contract.id}`,
+                    success: `https://www.limitlessholdings.site/inquilino-dashboard/payment/success?contractId=${contract.id}`,
+                    failure: `https://www.limitlessholdings.site/inquilino-dashboard/payment/failed?contractId=${contract.id}`,
+                    pending: `https://www.limitlessholdings.site/inquilino-dashboard/payment/pending?contractId=${contract.id}`,
                 },
             } 
         });
@@ -103,7 +103,7 @@ export const MercadoPagoCallback: RequestHandler  = async (req, res, next) => {
         });
 
         if (landlord && landlord.mercadopagoaccesstoken !== null) {
-            return res.redirect(`http://localhost:3000/arrendador-dashboard/propiedades`);
+            return res.redirect(`https://www.limitlessholdings.site/arrendador-dashboard/propiedades`);
         }
 
         const data = await oauth.create({
@@ -128,11 +128,11 @@ export const MercadoPagoCallback: RequestHandler  = async (req, res, next) => {
         },
         });
 
-        return res.redirect(`http://localhost:3000/arrendador-dashboard/propiedades`);
+        return res.redirect(`https://www.limitlessholdings.site/arrendador-dashboard/propiedades`);
     }
     catch (error) {
         next(error);
-        return res.redirect(`http://localhost:3000/error`);
+        return res.redirect(`https://www.limitlessholdings.site/error`);
     }
 }
 
