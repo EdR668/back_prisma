@@ -163,17 +163,32 @@ export const deleteProperty: RequestHandler = async (req, res, next) => {
     const { id } = req.params;
     const propertyId = Number(id);
 
-    // Eliminar primero los registros en PropertyMedia
-    await prisma.propertyMedia.deleteMany({
-      where: { property: { id: propertyId } },
+    // Primero, eliminar las referencias de las aplicaciones asociadas a la propiedad
+    await prisma.applicationReference.deleteMany({
+      where: { application: { propertyId } },
     });
 
-    // Luego eliminar la propiedad
+    // Eliminar los medios asociados a las aplicaciones de la propiedad
+    await prisma.applicationMedia.deleteMany({
+      where: { application: { propertyId } },
+    });
+
+    // Eliminar las aplicaciones que referencian la propiedad
+    await prisma.application.deleteMany({
+      where: { propertyId },
+    });
+
+    // Eliminar los medios asociados directamente a la propiedad
+    await prisma.propertyMedia.deleteMany({
+      where: { propertyFk: propertyId },
+    });
+
+    // Finalmente, eliminar la propiedad
     await prisma.property.delete({
       where: { id: propertyId },
     });
 
-    res.status(200).json("Property successfully deleted");
+    res.status(200).json("Propiedad eliminada correctamente.");
   } catch (error: any) {
     next(error);
   }

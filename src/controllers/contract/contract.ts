@@ -269,9 +269,22 @@ export const deleteContract: RequestHandler = async (req, res, next) => {
   try {
     const { id } = req.params;
     const contractId = Number(id);
+
+    // Primero, eliminar los documentos asociados al contrato
+    await prisma.contractDocument.deleteMany({
+      where: { contractId },
+    });
+
+    // Luego, eliminar los pagos asociados al contrato
+    await prisma.payment.deleteMany({
+      where: { contractId },
+    });
+
+    // Finalmente, eliminar el contrato
     const deletedContract = await prisma.contract.delete({
       where: { id: contractId },
     });
+
     if (!deletedContract) {
       throw createHttpError(404, `Contract with ID ${id} not found`);
     }

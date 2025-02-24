@@ -88,11 +88,22 @@ export const updateApplication: RequestHandler = async (req, res, next) => {
   }
 };
 
-/** Elimina una aplicación por su id */
 export const deleteApplication: RequestHandler = async (req, res, next) => {
   try {
     const { id } = req.params;
     const applicationId = Number(id);
+
+    // Primero, eliminar los medios asociados a la aplicación
+    await prisma.applicationMedia.deleteMany({
+      where: { applicationId },
+    });
+
+    // Luego, eliminar las referencias asociadas a la aplicación
+    await prisma.applicationReference.deleteMany({
+      where: { applicationId },
+    });
+
+    // Finalmente, eliminar la aplicación
     await prisma.application.delete({
       where: { id: applicationId },
     });
@@ -106,6 +117,7 @@ export const deleteApplication: RequestHandler = async (req, res, next) => {
     next(error);
   }
 };
+
 
 /** Muestra una aplicación, incluyendo referencias, documentos y los detalles del inquilino */
 export const showApplication: RequestHandler = async (req, res, next) => {
