@@ -21,10 +21,10 @@ export const createLandlord: RequestHandler = async (req, res, next) => {
     if (avatarFile) {
       avatarUrl = await uploadFileS3(avatarFile);
     }
-
+    
     const newLandlord = await prisma.landlord.create({
       data: {
-        id, // campo adicional
+        id:Number(id), // campo adicional
         firstName,
         lastName,
         phone,
