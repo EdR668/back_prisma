@@ -10,34 +10,54 @@ export const createLandlord: RequestHandler = async (req, res, next) => {
     const { id, firstName, lastName, phone, email, avgRating, authID, gender } = req.body;
     const avatarFile = req.files?.files; // La imagen enviada en el campo `files`
 
+    // Validar y convertir tipos
+    const parsedId = Number(id);
+    if (isNaN(parsedId)) {
+      res.status(400).json({ message: "id debe ser un número válido" });
+      return;
+    }
+
+    const parsedAvgRating = avgRating !== undefined ? parseFloat(avgRating) : 0;
+    if (avgRating !== undefined && isNaN(parsedAvgRating)) {
+      res.status(400).json({ message: "avgRating debe ser un número válido" });
+      return;
+    }
+
+    const parsedAuthID = String(authID);
+    const allowedGenders = ["Masculino", "Femenino"];
+    if (!allowedGenders.includes(gender)) {
+      res.status(400).json({ message: "gender debe ser 'Masculino' o 'Femenino'" });
+      return;
+    }
+
     // Verificar si el landlord ya existe
-    const existingLandlord = await prisma.landlord.findUnique({ where: { authID } });
+    const existingLandlord = await prisma.landlord.findUnique({ where: { authID: parsedAuthID } });
     if (existingLandlord) {
       res.status(409).json({ message: "ID Already Taken" });
-      return; // Sin retornar un valor
+      return;
     }
 
     let avatarUrl = "";
     if (avatarFile) {
       avatarUrl = await uploadFileS3(avatarFile);
     }
-    
+
     const newLandlord = await prisma.landlord.create({
       data: {
-        id:Number(id), // campo adicional
+        id: parsedId,
         firstName,
         lastName,
         phone,
         email,
-        avgRating: avgRating ?? 0,
-        authID,
+        avgRating: parsedAvgRating,
+        authID: parsedAuthID,
         gender,
         avatar: avatarUrl,
       },
     });
 
     res.status(201).json(newLandlord);
-    return; // Finaliza sin retornar un Response
+    return;
   } catch (error: any) {
     if (error.code === "P2002") {
       res.status(409).json({
@@ -50,6 +70,7 @@ export const createLandlord: RequestHandler = async (req, res, next) => {
     next(error);
   }
 };
+
 
 export const updateLandlord: RequestHandler = async (req, res, next) => {
   try {
