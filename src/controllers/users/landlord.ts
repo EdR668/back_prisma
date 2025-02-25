@@ -154,7 +154,7 @@ export const showLandlords: RequestHandler = async (req, res, next) => {
 export const getActiveTenantsByLandlord: RequestHandler = async (req, res, next) => {
   try {
     const { id } = req.params; // authID del landlord
-    const now = new Date();
+
 
     // Buscar el landlord junto con sus propiedades
     const landlord = await prisma.landlord.findUnique({
@@ -164,8 +164,7 @@ export const getActiveTenantsByLandlord: RequestHandler = async (req, res, next)
           include: {
             Contract: {
               where: {
-                startDate: { lte: now },
-                endDate: { gte: now },
+                status:"1"
               },
               include: { tenant: true },
             },
@@ -173,7 +172,7 @@ export const getActiveTenantsByLandlord: RequestHandler = async (req, res, next)
         },
       },
     });
-    console.log(landlord);
+
     
 
     if (!landlord) {
