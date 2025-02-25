@@ -31,11 +31,7 @@ export const createTenant: RequestHandler = async (req, res, next) => {
     } = req.body;
 
     // Validar y convertir los campos numéricos
-    const parsedId = Number(id);
-    if (isNaN(parsedId)) {
-      res.status(400).json({ message: "id debe ser un número válido" });
-      return;
-    }
+ 
     const parsedAge = Number(age);
     if (isNaN(parsedAge)) {
       res.status(400).json({ message: "age debe ser un número válido" });
@@ -117,7 +113,7 @@ export const createTenant: RequestHandler = async (req, res, next) => {
         rating, // Se asume que se envía en el formato correcto del enum Rating
         isFamily: parsedIsFamily,
         tenure: parsedTenure,
-        id: parsedId,
+        id,
         avatar: avatarUrl,
       },
     });

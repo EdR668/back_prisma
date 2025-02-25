@@ -11,11 +11,8 @@ export const createLandlord: RequestHandler = async (req, res, next) => {
     const avatarFile = req.files?.files; // La imagen enviada en el campo `files`
 
     // Validar y convertir tipos
-    const parsedId = Number(id);
-    if (isNaN(parsedId)) {
-      res.status(400).json({ message: "id debe ser un número válido" });
-      return;
-    }
+  
+
 
     const parsedAvgRating = avgRating !== undefined ? parseFloat(avgRating) : 0;
     if (avgRating !== undefined && isNaN(parsedAvgRating)) {
@@ -44,7 +41,7 @@ export const createLandlord: RequestHandler = async (req, res, next) => {
 
     const newLandlord = await prisma.landlord.create({
       data: {
-        id: parsedId,
+        id,
         firstName,
         lastName,
         phone,

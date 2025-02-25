@@ -30,7 +30,7 @@ model Tenant {
   tenure              Int                @default(0)
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
-  id                  Int                @unique
+  id                  String             @unique @db.VarChar(255)
   Application         Application[]
   Appointment         Appointment[]
   Contract            Contract[]
@@ -59,7 +59,7 @@ model Landlord {
   createdAt              DateTime             @default(now())
   /// Fecha de última actualización
   updatedAt              DateTime             @updatedAt
-  id                     Int                  @unique
+  id                     String               @unique @db.VarChar(255)
   mercadopagoaccesstoken String?
   Appointment            Appointment[]
   LandlordPreference     LandlordPreference[]
