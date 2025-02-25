@@ -22,7 +22,7 @@ export const createTenant: RequestHandler = async (req, res, next) => {
     if (avatarFile) {
       avatarUrl = await uploadFileS3(avatarFile);
     }
-
+    tenantData.id = Number(tenantData.id);
     const newTenant = await prisma.tenant.create({
       data: {
         ...tenantData,
@@ -59,7 +59,9 @@ export const updateTenant: RequestHandler = async (req, res, next) => {
     return;
   } catch (error: any) {
     if (error.code === "P2025") {
-      return next(createHttpError(404, `Tenant with ID ${req.params.id} not found`));
+      return next(
+        createHttpError(404, `Tenant with ID ${req.params.id} not found`)
+      );
     }
     next(error);
   }
@@ -73,11 +75,15 @@ export const deleteTenant: RequestHandler = async (req, res, next) => {
       where: { authID: id },
     });
 
-    res.status(200).json({ message: "Tenant successfully deleted", deletedTenant });
+    res
+      .status(200)
+      .json({ message: "Tenant successfully deleted", deletedTenant });
     return;
   } catch (error: any) {
     if (error.code === "P2025") {
-      return next(createHttpError(404, `Tenant with ID ${req.params.id} not found`));
+      return next(
+        createHttpError(404, `Tenant with ID ${req.params.id} not found`)
+      );
     }
     next(error);
   }
