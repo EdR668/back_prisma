@@ -188,6 +188,7 @@ export const getActiveTenantsByLandlord: RequestHandler = async (req, res, next)
       }))
     );
 
+    
     if (!activeTenants || activeTenants.length === 0) {
       return next(createHttpError(404, "No active tenants found"));
     }
