@@ -7,6 +7,7 @@ import {
   showLandlords,
   getActiveTenantsByLandlord,
   validateMercadoPagoAccessToken,
+  amountPaymentSubscription
 } from "../../controllers/users/landlord";
 import { showPropertiesAndCandidatesByLandlordId } from "../../controllers/properties/property";
 
@@ -221,6 +222,25 @@ LandlordRouter.get("/:landlordId/candidates", showPropertiesAndCandidatesByLandl
  */
 LandlordRouter.get("/mercado-pago/validate-access-token/:authID", validateMercadoPagoAccessToken);
 
+/**
+ * @swagger
+ * /api/landlord/amount-payment-subscription:
+ *   post:
+ *     tags:
+ *       - Landlords
+ *     summary: Recuperar monto a pagar mensualmente por landlordId
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/LandlordId'
+ *     responses:
+ *       '200':
+ *         description: Monto a pagar mensualmente
+ */
+LandlordRouter.post("/amount-payment-subscription", amountPaymentSubscription);
+
 
 export default LandlordRouter;
 
@@ -299,3 +319,19 @@ export default LandlordRouter;
  *           type: string
  *           description: Correo electrónico del arrendador
 */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     LandlordId:
+ *       type: object
+ *       required:
+ *         - landlordAuthID
+ *       properties:
+ *         landlordAuthID:
+ *           type: string
+ *           description: ID del arrendador
+ *       example:
+ *         landlordAuthID: "1"
+ */

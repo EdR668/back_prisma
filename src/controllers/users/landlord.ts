@@ -237,3 +237,33 @@ export const validateMercadoPagoAccessToken: RequestHandler = async (req, res, n
     next(error);
   }
 };
+
+export const amountPaymentSubscription: RequestHandler = async (req, res, next) => {
+  try {
+    const {landlordAuthID} = req.body;
+
+    if (!landlordAuthID) {
+      return next(createHttpError(400, "Landlord ID is required"));
+    }
+
+    const landlord = await prisma.landlord.findUnique({
+      where: { authID: landlordAuthID },
+    });
+
+    if (!landlord) {
+      return next(createHttpError(404, `Landlord with ID ${landlordAuthID} not found`));
+    }
+
+    const amountProperties = await prisma.property.count({
+      where: { landlordAuthID: landlordAuthID },
+    });
+
+    const payment = 100000 * amountProperties;
+
+    res.status(200).json({ amount: payment
+    });
+  }
+  catch (error) {
+    next(error);
+  }
+}

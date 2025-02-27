@@ -136,3 +136,70 @@ export const MercadoPagoCallback: RequestHandler  = async (req, res, next) => {
     }
 }
 
+export const CreateLandlordPreference: RequestHandler = async (req, res, next) => {
+    try {
+        const {landlordId} = req.body;
+
+        if (!landlordId) {
+            throw createHttpError(400, "El ID del arrendador es requerido");
+        }
+
+        const landlord = await prisma.landlord.findUnique({
+            where: { authID: landlordId },
+        });
+
+        if (!landlord) {
+            throw createHttpError(404, "El arrendador no existe");
+        }
+
+        const amountProperties = await prisma.property.count({
+            where: { landlordAuthID: landlordId },
+        });
+
+        if (amountProperties === 0) {
+            throw createHttpError(400, "El arrendador no tiene propiedades");
+        }
+
+        if (!process.env.MERCADO_PAGO_ACCESS_TOKEN) {
+            throw new Error("MERCADO_PAGO_ACCESS_TOKEN is not defined");
+        }
+
+        const client = new MercadoPagoConfig({ accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN });
+        const preference = new Preference(client);
+
+        const response = await preference.create({
+            body: {
+                items: [
+                    {   
+                        id: landlordId,
+                        title: "Pago de membresía mensual de Limitless Holdings",
+                        unit_price: 100000 * amountProperties,
+                        quantity: 1,
+                        currency_id: "COP",
+                    },
+                ],
+                payer: {
+                    email: landlord.email,
+                    name: landlord.firstName,
+                    surname: landlord.lastName,
+                },
+                marketplace: "Limitless Holdings",
+                external_reference: landlordId,
+                auto_return: "approved",
+                back_urls: {
+                    success: `https://www.limitlessholdings.site/arrendador-dashboard/payment/success?landlordId=${landlordId}`,
+                    failure: `https://www.limitlessholdings.site/arrendador-dashboard/payment/failed?landlordId=${landlordId}`,
+                    pending: `https://www.limitlessholdings.site/arrendador-dashboard/payment/pending?landlordId=${landlordId}`,
+                },
+            } 
+        });
+
+        res.status(201).json({
+            message: "Preferencia de pago creada exitosamente",
+            init_point: response.init_point,
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+};
